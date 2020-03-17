@@ -1,6 +1,5 @@
-import json, sys, datetime, logging, os, time
+import datetime, json, logging, os, sys, time
 import requests
-
 
 class HoverClient:
 	def __init__(self, config):
@@ -25,30 +24,14 @@ class HoverClient:
 
 		self.hoverToken = {"hoverauth": r.cookies["hoverauth"]}
 		self.hoverTokenTimestamp = datetime.datetime.now()
-
-		#temp cache token in file ------------------------------------------------------
-		# try:
-		# 	os.remove(self.tokenFile)
-		# except:
-		# 	logging.info('token file was not deleted')
-		# else:
-		# 	logging.info('token file was deleted')
-		# with open(self.tokenFile, 'w', encoding='utf-8') as f:
-		# 	json.dump(self.hoverToken, f, ensure_ascii=False, indent=4, sort_keys=True)
-		#temp cache token in file ------------------------------------------------------
+		return
 
 	def checkAuth(self):
 		lastAuthDelta = datetime.datetime.now() - self.hoverTokenTimestamp
 		if lastAuthDelta.total_seconds() > (6 * 60 * 60): #ReAuth after 6 Hours
 			logging.info('reauthentication needed')
 			self.getAuth()
-
-		#temp
-		# logging.info('reading token from file')
-		# with open(self.tokenFile, 'r', encoding='utf-8') as f:
-		# 	self.hoverToken = json.load(f)
-		# logging.info('token read as {}'.format(self.hoverToken))
-		#temp
+		return
 
 	def call(self, method, resource, data=None):
 		self.checkAuth()
@@ -82,9 +65,7 @@ class HoverClient:
 		return self.call('put', 'dns/' + self.hoverId, {'content': newIp})
 
 
-
 if __name__ == "__main__":
-
 	config = {
 		'HOVERUSER': os.getenv('HOVERUSER'),
 		'HOVERPASS': os.getenv('HOVERPASS'),
