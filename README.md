@@ -8,6 +8,6 @@ A use-case would be a home LAN with the following features:
 
 I have been using one of the free dynamic dns providers with a monthly nag email and didnt hear about duckdns until i got too far and interested in finishing this one :/
 
-| | |
-| -- | -- |
-| Info | Based on [hover-dns-updater.](https://github.com/texasaggie97/hover-dns-updater) Simplified and targetted for a simple docker image
+Info | Based on [hover-dns-updater.](https://github.com/texasaggie97/hover-dns-updater) Simplified and targetted for a simple docker image
+
+
