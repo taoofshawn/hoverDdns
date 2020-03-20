@@ -20,7 +20,7 @@ class HoverClient:
 		if not r.ok or "hoverauth" not in r.cookies:
 			logging.error('could not authenticate with Hover')
 			sys.exit(1)
-		logging.error('authenticated successfully with Hover')
+		logging.info('authenticated successfully with Hover')
 
 		self.hoverToken = {"hoverauth": r.cookies["hoverauth"]}
 		self.hoverTokenTimestamp = datetime.datetime.now()
@@ -70,22 +70,18 @@ if __name__ == "__main__":
 		'HOVERUSER': os.getenv('HOVERUSER'),
 		'HOVERPASS': os.getenv('HOVERPASS'),
 		'HOVERID': os.getenv('HOVERID'),
-		'POLLTIME': os.getenv('HOVERPOLLTIME')
+		'POLLTIME': os.getenv('POLLTIME', default=360),
+		'LOGLEVEL': os.getenv('LOGLEVEL', default='INFO')
 	}
 
+	logging.basicConfig(format='%(asctime)s - %(message)s', level=config['LOGLEVEL'])
+
 	for key in config:
-		if key == 'POLLTIME':
-			try:
-				config[key] = int(config[key])
-			except:
-				config[key] = 360
-		elif config[key] is None:
+		if config[key] is None:
 			logging.error('missing environment variable: {}'.format(key))
 			sys.exit(1)
 
-	logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 	client = HoverClient(config)
-
 	while True:
 		if client.hoverIp != client.currentIp:
 			logging.info(
