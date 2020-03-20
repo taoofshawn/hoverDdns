@@ -28,7 +28,7 @@ If you haven't already, login and create an "A record" that will be updated by t
   - look for the "id" field on the same line as the record "name:" you just added. This is what will be used for the HOVERID environment variable below.  It will look like `dns12345678`
   - choose a Poll time in minutes.  This is how often this script will check your current external IP and compare to Hover.  It defaults to 360 min (6 hours) Set this in the POLLTIME environment variable below
 
-**Usage**
+## Usage
 ```
 docker run -d \
     --name=hoverddns \

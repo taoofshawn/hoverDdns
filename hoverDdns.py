@@ -70,7 +70,7 @@ if __name__ == "__main__":
 		'HOVERUSER': os.getenv('HOVERUSER'),
 		'HOVERPASS': os.getenv('HOVERPASS'),
 		'HOVERID': os.getenv('HOVERID'),
-		'POLLTIME': os.getenv('POLLTIME', default=360),
+		'POLLTIME': os.getenv('POLLTIME', default='360'),
 		'LOGLEVEL': os.getenv('LOGLEVEL', default='INFO')
 	}
 
@@ -95,7 +95,13 @@ if __name__ == "__main__":
 			logging.info(
 				'hover IP does not need to be updated. Hover: {}, Actual: {}'.format(
 					client.hoverIp, client.currentIp))
-		logging.info('sleeping for {} minutes'.format(config['POLLTIME']))
-		time.sleep(config['POLLTIME']*60) #Change to seconds
+
+		try:
+			polltime = int(config['POLLTIME'])
+		except:
+			polltime = 360
+		logging.info('sleeping for {} minutes'.format(polltime))
+		time.sleep(polltime*60)  # convert to seconds
+
 		client.hoverIp = client.getCurrentHoverIp()
 		client.currentIp = client.getCurrentExternalIp()
