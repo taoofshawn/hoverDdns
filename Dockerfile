@@ -1,6 +1,6 @@
 FROM python:3.7-buster as downloader
 WORKDIR /hoverDdns
-RUN git clone https://github.com/taoofshawn/hoverDdns.git . && \
+RUN git clone --single-branch --branch python git@github.com:taoofshawn/hoverDdns.git . && \
 	pip install -r requirements.txt
 
 FROM gcr.io/distroless/python3-debian10 as runner
