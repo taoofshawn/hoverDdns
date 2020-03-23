@@ -51,5 +51,5 @@ services:
       - HOVERPASS=<password>
       - HOVERID=<hover id>
       - POLLTIME=<minutes between polling hover>
-      - LOGLEVEL=<python log level>
+      - LOGLEVEL=<log level>
 ```
