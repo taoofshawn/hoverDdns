@@ -1,26 +1,35 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"github.com/golang/glog"
 	"os"
 )
 
 func main() {
+	
+	flag.Set("logtostderr", "true")  // Logging flag
+	flag.Parse()
+	defer glog.Flush()
+
 	config := map[string]string{
 		"HOVERUSER": os.Getenv("HOVERUSER"),
 		"HOVERPASS": os.Getenv("HOVERPASS"),
-		"HOVERID": os.Getenv("HOVERID"),
-		"POLLTIME": os.Getenv("POLLTIME"),
-		"LOGLEVEL": os.Getenv("LOGLEVEL"),
+		"HOVERID":   os.Getenv("HOVERID"),
+		"POLLTIME":  os.Getenv("POLLTIME"),
 	}
 	if len(config["POLLTIME"]) == 0 {
 		config["POLLTIME"] = "360"
 	}
-	if len(config["LOGLEVEL"]) == 0 {
-		config["LOGLEVEL"] = "INFO"
+
+	for k,v := range config {
+		if len(v) == 0 {
+			glog.Fatalf("missing environment variable: %s\n", k)
+		}
 	}
 
-	fmt.Println("map: ", config)
+	client := newHoverClient(config)
+	fmt.Println(client.username)
 
 }
-
