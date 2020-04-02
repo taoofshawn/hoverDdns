@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/golang/glog"
 	"os"
+
+	"github.com/golang/glog"
 )
 
 func main() {
@@ -30,6 +31,7 @@ func main() {
 	}
 
 	client := newHoverClient(config)
-	fmt.Println(client.username)
+	client.getAuth()
+	fmt.Println(client.hoverToken)
 
 }
