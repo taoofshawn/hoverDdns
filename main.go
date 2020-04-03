@@ -2,15 +2,15 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	// "fmt"
 	"os"
 
 	"github.com/golang/glog"
 )
 
 func main() {
-	
-	flag.Set("logtostderr", "true")  // Logging flag
+
+	flag.Set("logtostderr", "true") // Logging flag
 	flag.Parse()
 	defer glog.Flush()
 
@@ -24,14 +24,14 @@ func main() {
 		config["POLLTIME"] = "360"
 	}
 
-	for k,v := range config {
+	for k, v := range config {
 		if len(v) == 0 {
 			glog.Fatalf("missing environment variable: %s\n", k)
 		}
 	}
 
 	client := newHoverClient(config)
-	client.getAuth()
-	fmt.Println(client.hoverToken)
+
+	client.getCurrentHoverIP()
 
 }
