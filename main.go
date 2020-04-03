@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	// "fmt"
 	"os"
 
@@ -32,6 +33,6 @@ func main() {
 
 	client := newHoverClient(config)
 
-	client.getCurrentHoverIP()
+	fmt.Println(client.hoverIP)
 
 }

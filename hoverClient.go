@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	//	"fmt"
 	"net/http"
 	"strconv"
 	"time"
-	// "reflect"
 
 	"github.com/golang/glog"
 )
@@ -21,6 +19,7 @@ type hoverClient struct {
 	hoverToken          *http.Cookie
 	hoverTokenTimestamp time.Time
 	polltime            int
+	hoverIP             string
 }
 
 func newHoverClient(config map[string]string) *hoverClient {
@@ -33,6 +32,8 @@ func newHoverClient(config map[string]string) *hoverClient {
 		hoverID:  config["HOVERID"],
 		polltime: polltime,
 	}
+
+	hc.getCurrentHoverIP()
 
 	return &hc
 }
@@ -93,33 +94,30 @@ func (hc *hoverClient) getCurrentHoverIP() {
 	body, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 
-	b := []byte(body)
+	// Temp
+	// body, _ := ioutil.ReadFile("bodytemp.txt")
+	// Temp
+
+	data := []byte(body)
 
 	var f interface{}
-	err := json.Unmarshal(b, &f)
+	err := json.Unmarshal(data, &f)
 	if err != nil {
 		fmt.Println("pooper")
 	}
 
-	m := f.(map[string]interface{})
+	domains := f.(map[string]interface{})["domains"].([]interface{})
 
-	for k, v := range m {
-		if k == "domains" {
-			for _, vv := range v.([]interface{}) {
-				uu := vv.(map[string]interface{})
-				entries := uu["entries"]
-				for _, e := range entries.([]interface{}) {
-					entry := e.(map[string]interface{})
-					if entry["id"] == hc.hoverID {
-						fmt.Println(entry["content"]) //Yikes
-					}
-				}
+	for _, v := range domains {
+		entries := v.(map[string]interface{})["entries"].([]interface{})
+
+		for _, vv := range entries {
+			if vv.(map[string]interface{})["id"] == hc.hoverID {
+				hc.hoverIP = vv.(map[string]interface{})["content"].(string)
 			}
 		}
-
 	}
 }
-
 
 // func (hc *hoverClient) call(method, resource, data string) string {
 // 	defer glog.Flush()
