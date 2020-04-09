@@ -2,11 +2,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	// "fmt"
-	"os"
-
 	"github.com/golang/glog"
+	"os"
+	"strconv"
+	"time"
 )
 
 func main() {
@@ -21,9 +20,6 @@ func main() {
 		"HOVERID":   os.Getenv("HOVERID"),
 		"POLLTIME":  os.Getenv("POLLTIME"),
 	}
-	if len(config["POLLTIME"]) == 0 {
-		config["POLLTIME"] = "360"
-	}
 
 	for k, v := range config {
 		if len(v) == 0 {
@@ -33,6 +29,27 @@ func main() {
 
 	client := newHoverClient(config)
 
-	fmt.Println(client.hoverIP)
+	for true {
+		if client.hoverIP != client.currentIP {
+			glog.Infof("hover IP needs to be updated. Hover: %s, Actual: %s",
+				client.hoverIP, client.currentIP)
+
+			if err := client.updateHoverIP(client.currentIP); err != nil {
+				glog.Error("hover update failed")
+			}
+		} else {
+			glog.Infof("hover IP does not need to be updated. Hover: %s, Actual: %s",
+				client.hoverIP, client.currentIP)
+		}
+
+		polltime, err := strconv.Atoi(config["POLLTIME"])
+		if err != nil {
+			polltime = 360
+		}
+
+		glog.Infof("sleeping for %d minutes", polltime)
+		time.Sleep(time.Duration(polltime) * time.Second)
+
+	}
 
 }

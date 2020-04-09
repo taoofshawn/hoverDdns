@@ -3,10 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang/glog"
@@ -20,6 +21,7 @@ type hoverClient struct {
 	hoverTokenTimestamp time.Time
 	polltime            int
 	hoverIP             string
+	currentIP           string
 }
 
 func newHoverClient(config map[string]string) *hoverClient {
@@ -34,6 +36,7 @@ func newHoverClient(config map[string]string) *hoverClient {
 	}
 
 	hc.getCurrentHoverIP()
+	hc.getCurrentExternalIP()
 
 	return &hc
 }
@@ -78,15 +81,24 @@ func (hc *hoverClient) checkAuth() {
 	}
 }
 
+type hoverResponse struct {
+	Domains []struct {
+		Entries []struct {
+			ID      string `json:"id"`
+			Content string `json:"content"`
+		} `json:"entries"`
+	} `json:"domains"`
+}
+
 func (hc *hoverClient) getCurrentHoverIP() {
 	defer glog.Flush()
 	hc.checkAuth()
 
 	glog.Info("checking current IP address setting at Hover")
 
-	url := "https://www.hover.com/api/dns"
+	dnsURL := "https://www.hover.com/api/dns"
 
-	request, _ := http.NewRequest("GET", url, nil)
+	request, _ := http.NewRequest("GET", dnsURL, nil)
 	request.AddCookie(hc.hoverToken)
 
 	client := &http.Client{}
@@ -96,27 +108,62 @@ func (hc *hoverClient) getCurrentHoverIP() {
 
 	// Temp
 	// body, _ := ioutil.ReadFile("bodytemp.txt")
+	// ioutil.WriteFile("bodytemp.txt", body, 0644)
 	// Temp
 
-	data := []byte(body)
-
-	var f interface{}
-	err := json.Unmarshal(data, &f)
-	if err != nil {
-		fmt.Println("pooper")
-	}
-
-	domains := f.(map[string]interface{})["domains"].([]interface{})
-
-	for _, v := range domains {
-		entries := v.(map[string]interface{})["entries"].([]interface{})
-
-		for _, vv := range entries {
-			if vv.(map[string]interface{})["id"] == hc.hoverID {
-				hc.hoverIP = vv.(map[string]interface{})["content"].(string)
+	respDump := hoverResponse{}
+	json.Unmarshal([]byte(body), &respDump)
+	for _, domain := range respDump.Domains {
+		for _, entry := range domain.Entries {
+			if entry.ID == hc.hoverID {
+				hc.hoverIP = entry.Content
 			}
 		}
 	}
+}
+
+func (hc *hoverClient) getCurrentExternalIP() {
+	defer glog.Flush()
+	glog.Info("checking current external IP address")
+
+	resp, err := http.Get("https://api.ipify.org")
+	if err != nil {
+		glog.Error("unable get get current external IP address")
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	hc.currentIP = string(body)
+}
+
+func (hc *hoverClient) updateHoverIP(newIP string) error {
+	defer glog.Flush()
+	glog.Infof("updating hover IP with %s", newIP)
+
+	hc.checkAuth()
+
+	dnsURL := "https://www.hover.com/api/dns/" + hc.hoverID
+	content := url.Values{}
+	content.Add("content", newIP)
+
+	request, _ := http.NewRequest("PUT", dnsURL, strings.NewReader(content.Encode()))
+	request.AddCookie(hc.hoverToken)
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		glog.Error("could not connect to Hover!")
+	}
+
+	defer response.Body.Close()
+	contents, err := ioutil.ReadAll(response.Body)
+	if !strings.Contains(string(contents), "\"succeeded\":true") {
+		glog.Error("connected to Hover but data is missing!")
+	}
+
+	return err
+
 }
 
 // func (hc *hoverClient) call(method, resource, data string) string {
