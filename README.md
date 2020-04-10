@@ -51,3 +51,18 @@ services:
       - HOVERID=<hover id>
       - POLLTIME=<minutes between polling hover>
 ```
+use docker logs to monitor:
+```
+docker logs -f hoverddns
+I0410 17:07:40.229029       1 hoverClient.go:50] attempting authentication with Hover
+I0410 17:07:41.061048       1 hoverClient.go:72] authenticated successfully with Hover
+I0410 17:07:41.061076       1 hoverClient.go:127] checking current IP address setting at Hover
+I0410 17:07:41.061087       1 hoverClient.go:93] connecting to Hover
+I0410 17:07:41.354872       1 hoverClient.go:110] request to Hover was successful
+I0410 17:07:41.355398       1 hoverClient.go:144] checking current external IP address
+I0410 17:07:41.489291       1 main.go:34] hover IP needs to be updated. Hover: x.x.x.x, Actual: y.y.y.y
+I0410 17:07:41.489376       1 hoverClient.go:158] updating hover IP with y.y.y.y
+I0410 17:07:41.489434       1 hoverClient.go:93] connecting to Hover
+I0410 17:07:41.546154       1 hoverClient.go:110] request to Hover was successful
+I0410 17:07:41.546194       1 main.go:50] sleeping for 360 minutes
+```
