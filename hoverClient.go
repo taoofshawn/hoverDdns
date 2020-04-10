@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -52,11 +51,11 @@ func (hc *hoverClient) getAuth() {
 	loginURL := "https://www.hover.com/api/login"
 	headers := "application/json"
 
-	response, _ := http.Post(loginURL, headers, bytes.NewReader(datab))
+	response, err := http.Post(loginURL, headers, bytes.NewReader(datab))
 
 	for _, cookie := range response.Cookies() {
 
-		if cookie.Name == "hoverauth" {
+		if err != nil || cookie.Name == "hoverauth" {
 			hc.hoverToken = cookie
 			hc.hoverTokenTimestamp = time.Now()
 		}
@@ -82,6 +81,35 @@ func (hc *hoverClient) checkAuth() {
 	}
 }
 
+func (hc *hoverClient) call(method, resource, data string) ([]byte, error) {
+	defer glog.Flush()
+	hc.checkAuth()
+
+	url := "https://www.hover.com/api/" + resource
+
+	glog.Info("connecting to Hover")
+	request, _ := http.NewRequest(method, url, strings.NewReader(data))
+	request.AddCookie(hc.hoverToken)
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		glog.Error("could not connect to Hover!")
+	}
+
+	defer response.Body.Close()
+	body, _ := ioutil.ReadAll(response.Body)
+
+	if !strings.Contains(string(body), "\"succeeded\":true") || err != nil {
+		glog.Error("connected to Hover but data is missing!")
+	} else {
+		glog.Info("request to Hover was successful")
+	}
+
+	return body, err
+}
+
 type hoverResponse struct {
 	Domains []struct {
 		Entries []struct {
@@ -93,23 +121,13 @@ type hoverResponse struct {
 
 func (hc *hoverClient) getCurrentHoverIP() {
 	defer glog.Flush()
-	hc.checkAuth()
-
 	glog.Info("checking current IP address setting at Hover")
 
-	dnsURL := "https://www.hover.com/api/dns"
+	body, _ := hc.call("GET", "dns", "")
 
-	request, _ := http.NewRequest("GET", dnsURL, nil)
-	request.AddCookie(hc.hoverToken)
-
-	client := &http.Client{}
-	resp, _ := client.Do(request)
-	body, _ := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-
-	respDump := hoverResponse{}
-	json.Unmarshal([]byte(body), &respDump)
-	for _, domain := range respDump.Domains {
+	allHoverData := hoverResponse{}
+	json.Unmarshal(body, &allHoverData)
+	for _, domain := range allHoverData.Domains {
 		for _, entry := range domain.Entries {
 			if entry.ID == hc.hoverID {
 				hc.hoverIP = entry.Content
@@ -136,49 +154,10 @@ func (hc *hoverClient) updateHoverIP(newIP string) error {
 	defer glog.Flush()
 	glog.Infof("updating hover IP with %s", newIP)
 
-	hc.checkAuth()
+	resource := "dns/" + hc.hoverID
+	data := "content=" + newIP
 
-	dnsURL := "https://www.hover.com/api/dns/" + hc.hoverID
-	content := strings.NewReader(fmt.Sprintf("content=%s", newIP))
-
-	request, _ := http.NewRequest("PUT", dnsURL, content)
-	request.AddCookie(hc.hoverToken)
-	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	client := &http.Client{}
-	response, err := client.Do(request)
-	if err != nil {
-		glog.Error("could not connect to Hover!")
-	}
-
-	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
-	if !strings.Contains(string(contents), "\"succeeded\":true") {
-		glog.Error("connected to Hover but data is missing!")
-	}
+	_, err := hc.call("PUT", resource, data)
 
 	return err
-
 }
-
-// func (hc *hoverClient) call(method, resource, data string) string {
-// 	defer glog.Flush()
-// 	hc.checkAuth()
-
-// 	url := "https://www.hover.com/api/%s", resource
-
-// 	glog.Info("connecting to Hover")
-
-// 	res, _ := http.Get(url, )
-
-// 	// r = requests.request(method, url, data=data, cookies=self.hoverToken)
-// 	// if not r.ok:
-// 	// 	logging.error('could not connect to Hover!')
-// 	// if r.content:
-// 	// 	body = r.json()
-// 	// 	if "succeeded" not in body or body["succeeded"] is not True:
-// 	// 		logging.error('connected to Hover but data is missing!')
-// 	// 	logging.info('request to Hover was successful')
-// 	// 	return body
-
-// }

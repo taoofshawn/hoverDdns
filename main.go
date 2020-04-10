@@ -2,15 +2,16 @@ package main
 
 import (
 	"flag"
-	"github.com/golang/glog"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/golang/glog"
 )
 
 func main() {
 
-	flag.Set("logtostderr", "true") // Logging flag
+	flag.Set("logtostderr", "true")
 	flag.Parse()
 	defer glog.Flush()
 
