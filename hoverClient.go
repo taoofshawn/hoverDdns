@@ -25,7 +25,10 @@ type hoverClient struct {
 
 func newHoverClient(config map[string]string) *hoverClient {
 
-	polltime, _ := strconv.Atoi(config["POLLTIME"])
+	polltime, err := strconv.Atoi(config["POLLTIME"])
+	if err != nil {
+		polltime = 360
+	}
 
 	hc := hoverClient{
 		username: config["HOVERUSER"],

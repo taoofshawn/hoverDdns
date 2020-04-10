@@ -36,7 +36,6 @@ docker run -d \
     -e HOVERPASS=<password> \
     -e HOVERID=<hover id> \
     -e POLLTIME=360 \
-    -e LOGLEVEL=INFO \
     taoofshawn/hoverddns
 ```
 Or use docker-compose.yml:
@@ -51,5 +50,4 @@ services:
       - HOVERPASS=<password>
       - HOVERID=<hover id>
       - POLLTIME=<minutes between polling hover>
-      - LOGLEVEL=<log level>
 ```

@@ -19,7 +19,6 @@ func main() {
 		"HOVERUSER": os.Getenv("HOVERUSER"),
 		"HOVERPASS": os.Getenv("HOVERPASS"),
 		"HOVERID":   os.Getenv("HOVERID"),
-		"POLLTIME":  os.Getenv("POLLTIME"),
 	}
 
 	for k, v := range config {
