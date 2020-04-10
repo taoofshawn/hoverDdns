@@ -3,9 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -35,6 +35,7 @@ func newHoverClient(config map[string]string) *hoverClient {
 		polltime: polltime,
 	}
 
+	hc.getAuth()
 	hc.getCurrentHoverIP()
 	hc.getCurrentExternalIP()
 
@@ -106,11 +107,6 @@ func (hc *hoverClient) getCurrentHoverIP() {
 	body, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 
-	// Temp
-	// body, _ := ioutil.ReadFile("bodytemp.txt")
-	// ioutil.WriteFile("bodytemp.txt", body, 0644)
-	// Temp
-
 	respDump := hoverResponse{}
 	json.Unmarshal([]byte(body), &respDump)
 	for _, domain := range respDump.Domains {
@@ -143,10 +139,9 @@ func (hc *hoverClient) updateHoverIP(newIP string) error {
 	hc.checkAuth()
 
 	dnsURL := "https://www.hover.com/api/dns/" + hc.hoverID
-	content := url.Values{}
-	content.Add("content", newIP)
+	content := strings.NewReader(fmt.Sprintf("content=%s", newIP))
 
-	request, _ := http.NewRequest("PUT", dnsURL, strings.NewReader(content.Encode()))
+	request, _ := http.NewRequest("PUT", dnsURL, content)
 	request.AddCookie(hc.hoverToken)
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 

@@ -48,7 +48,7 @@ func main() {
 		}
 
 		glog.Infof("sleeping for %d minutes", polltime)
-		time.Sleep(time.Duration(polltime) * time.Second)
+		time.Sleep(time.Duration(polltime) * time.Minute)
 
 	}
 
