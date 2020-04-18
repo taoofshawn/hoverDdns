@@ -42,7 +42,7 @@ func main() {
 				client.hoverIP, client.currentIP)
 		}
 
-		polltime, err := strconv.Atoi(config["POLLTIME"])
+		polltime, err := strconv.Atoi(os.Getenv("POLLTIME"))
 		if err != nil {
 			polltime = 360
 		}

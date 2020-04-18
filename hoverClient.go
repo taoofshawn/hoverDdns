@@ -18,23 +18,17 @@ type hoverClient struct {
 	hoverID             string
 	hoverToken          *http.Cookie
 	hoverTokenTimestamp time.Time
-	polltime            int
 	hoverIP             string
 	currentIP           string
 }
 
 func newHoverClient(config map[string]string) *hoverClient {
 
-	polltime, err := strconv.Atoi(config["POLLTIME"])
-	if err != nil {
-		polltime = 360
-	}
 
 	hc := hoverClient{
 		username: config["HOVERUSER"],
 		password: config["HOVERPASS"],
 		hoverID:  config["HOVERID"],
-		polltime: polltime,
 	}
 
 	hc.getAuth()
