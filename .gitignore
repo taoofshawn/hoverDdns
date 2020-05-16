@@ -2,9 +2,11 @@
 .gradle
 .vscode
 venv
+.idea
 
 # Ignore Gradle build output directory
 build
+gradle
 
 # Compiled class file
 *.class
