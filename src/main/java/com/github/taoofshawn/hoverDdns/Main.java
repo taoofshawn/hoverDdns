@@ -40,7 +40,21 @@ public class Main {
 
 //		System.out.println(client.getExternalIP());
 		client.getAuth();
-		System.out.println(client.getHoverIP());
+//		System.out.println(client.getHoverIP());
+
+		String hoverIP = client.getHoverIP();
+		String externalIP = client.getExternalIP();
+
+		if (hoverIP.equals(externalIP)) {
+			logger.info(String.format("hover IP does not need to be updated. Hover: %s, Actual: %s", hoverIP, externalIP ));
+		} else {
+			logger.info(String.format("hover IP needs to be updated. Hover: %s, Actual: %s", hoverIP, externalIP ));
+			// update IP here
+		}
+
+
+
+
 	}
 
 }
