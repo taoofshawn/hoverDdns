@@ -7,8 +7,8 @@ RUN git clone --branch java https://github.com/taoofshawn/hoverDdns.git . && \
 
 FROM gcr.io/distroless/java:11 as runner
 
-COPY --from=builder /build/libs/*.jar /app
-WORKDIR /app
+COPY --from=builder /app/build/libs/*.jar /app/
 
-ENTRYPOINT ["hoverDdns.jar"]
+WORKDIR /app
+CMD ["hoverDdns.jar"]
 
