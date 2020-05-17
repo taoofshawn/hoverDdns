@@ -66,7 +66,7 @@ public class HoverDdns {
 				.header("Content-Type", "application/json")
 				.build();
 
-		HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+		httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
 	}
 
@@ -127,7 +127,7 @@ public class HoverDdns {
 				.PUT(HttpRequest.BodyPublishers.ofString(String.format("content=%s", hoverIP)))
 				.build();
 
-		HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+		httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
 	}
 

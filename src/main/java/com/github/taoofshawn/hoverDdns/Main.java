@@ -15,7 +15,7 @@ public class Main {
 		String hoveruser = null;
 		String hoverpass = null;
 		String hoverid = null;
-		int polltime = 0;
+		int polltime;
 
 		if (System.getenv("HOVERUSER") == null) {
 			logger.error("missing environment variable: HOVERUSER");
