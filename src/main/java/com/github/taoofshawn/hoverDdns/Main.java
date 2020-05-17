@@ -4,6 +4,8 @@ package com.github.taoofshawn.hoverDdns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 public class Main {
 
 	public static void main(String[] args) throws Exception {
@@ -13,7 +15,7 @@ public class Main {
 		String hoveruser = null;
 		String hoverpass = null;
 		String hoverid = null;
-		String polltime = null;
+		int polltime = 0;
 
 		if (System.getenv("HOVERUSER") == null) {
 			logger.error("missing environment variable: HOVERUSER");
@@ -30,30 +32,44 @@ public class Main {
 			hoverid = System.getenv("HOVERID");
 		}
 
-		if (System.getenv("POLLTIME") == null) {
-			polltime = "360";
-		} else {
-			polltime = System.getenv("POLLTIME");
+
+		try {
+			polltime = Integer.parseInt(System.getenv("POLLTIME"));
+
+		} catch (Exception exp) {
+			polltime = 360;
 		}
+
 
 		HoverDdns client = new HoverDdns(hoveruser, hoverpass, hoverid);
 
-//		System.out.println(client.getExternalIP());
-		client.getAuth();
-//		System.out.println(client.getHoverIP());
+		String hoverIP = "";
+		String externalIP = "";
 
-		String hoverIP = client.getHoverIP();
-		String externalIP = client.getExternalIP();
+		while (true) {
 
-		if (hoverIP.equals(externalIP)) {
-			logger.info(String.format("hover IP does not need to be updated. Hover: %s, Actual: %s", hoverIP, externalIP ));
-		} else {
-			logger.info(String.format("hover IP needs to be updated. Hover: %s, Actual: %s", hoverIP, externalIP ));
-			// update IP here
+			try {
+				hoverIP = client.getHoverIP();
+				externalIP = client.getExternalIP();
+			} catch (Exception exc) {
+				logger.error("unable to get current IP information");
+			}
+
+			if (hoverIP.equals(externalIP)) {
+				logger.info(String.format("hover IP does not need to be updated. Hover: %s, Actual: %s", hoverIP, externalIP));
+			} else {
+				logger.info(String.format("hover IP needs to be updated. Hover: %s, Actual: %s", hoverIP, externalIP));
+
+				try {
+					client.updateHoverIP(externalIP);
+				} catch (Exception exc) {
+					logger.error("hover update failed");
+				}
+			}
+
+			logger.info(String.format("sleeping for %d minutes", polltime));
+			TimeUnit.MINUTES.sleep(polltime);
 		}
-
-
-
 
 	}
 
