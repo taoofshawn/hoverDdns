@@ -1,5 +1,6 @@
 FROM gradle:jdk11 as builder
 
+WORKDIR /app
 RUN git clone --branch java https://github.com/taoofshawn/hoverDdns.git . && \
     gradle build
 
