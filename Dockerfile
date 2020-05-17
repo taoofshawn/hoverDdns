@@ -1,8 +1,13 @@
-FROM gradle:jdk14 as builder
+FROM gradle:jdk11 as builder
 
+RUN git clone --branch java https://github.com/taoofshawn/hoverDdns.git . && \
+    gradle build
+
+
+FROM gcr.io/distroless/java:11 as runner
+
+COPY --from=builder /build/libs/*.jar /app
 WORKDIR /app
 
-RUN git clone --branch java https://github.com/taoofshawn/hoverDdns.git .
-
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["hoverDdns.jar"]
 
