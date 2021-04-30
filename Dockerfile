@@ -1,7 +1,8 @@
 FROM golang:buster as builder
-RUN go get -d -v github.com/taoofshawn/hoverDdns && \
-    go build -o / github.com/taoofshawn/hoverDdns
+RUN git clone https://github.com/taoofshawn/hoverDdns.git /hoverDdns && \
+    cd /hoverDdns && \
+    go build
 
-FROM gcr.io/distroless/base-debian10 as runner
-COPY --from=builder /hoverDdns /
+FROM gcr.io/distroless/base as runner
+COPY --from=builder /hoverDdns/hoverDdns /
 CMD ["/hoverDdns"]
