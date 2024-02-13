@@ -1,4 +1,7 @@
-# hoverDdns
+# hoverDdns - Broken
+## I believe Hover disabled this API to make room for a new [partners product](https://partners.hover.com/reference/about-hover)
+## Hopefully its something else but can't connect for now.
+
 Keep a hover DNS record up to date with your external IP. 
 A use-case would be a home LAN with the following features:
 - NAT router - with a public WAN ip that may change periodically
